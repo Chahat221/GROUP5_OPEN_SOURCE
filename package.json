@@ -1,0 +1,31 @@
+{
+  "name": "group5_open_source",
+  "version": "1.0.0",
+  "description": "Backend forum website built with Node.js and TypeScript for the course final project.",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chahat221/GROUP5_OPEN_SOURCE.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Chahat221/GROUP5_OPEN_SOURCE/issues"
+  },
+  "homepage": "https://github.com/Chahat221/GROUP5_OPEN_SOURCE#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.3.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  }
+}
