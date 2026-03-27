@@ -1,12 +1,16 @@
 import { Booking } from "../../domain/entities/Booking";
 
-// Use case for creating a booking
 export class CreateBooking {
-  execute(userId: string, date: string): Booking {
+  execute(userId: string, service: string, date: string, startTime: string, endTime: string): Booking {
+
     const newBooking: Booking = {
-      id: Math.random().toString(),
-      userId,
-      date
+      id: Date.now().toString(),
+      userId: userId,
+      service: service,
+      date: date,
+      startTime: startTime,
+      endTime: endTime,
+      status: "pending"
     };
 
     return newBooking;
