@@ -14,8 +14,15 @@ export class BookingController {
       service,
       date,
       startTime,
-      endTime
+      endTime,
+      bookings
     );
+
+    if (!booking) {
+      return res.status(400).json({
+        message: "Time slot already booked"
+      });
+    }
 
     bookings.push(booking);
 
