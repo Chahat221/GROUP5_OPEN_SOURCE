@@ -1,12 +1,12 @@
 import express from "express";
+import { AuthController } from "./controllers/AuthController";
 
 const app = express();
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Group 5 Backend API Running");
-});
+app.post("/register", AuthController.register);
+app.post("/login", AuthController.login);
 
 const PORT = 3000;
 
