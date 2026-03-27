@@ -28,4 +28,23 @@ export class BookingController {
   static getAll(req: Request, res: Response) {
     res.json(bookings);
   }
+
+  static cancel(req: Request, res: Response) {
+    const { id } = req.params;
+
+    const bookingIndex = bookings.findIndex((booking) => booking.id === id);
+
+    if (bookingIndex === -1) {
+      return res.status(404).json({
+        message: "Booking not found"
+      });
+    }
+
+    const cancelledBooking = bookings.splice(bookingIndex, 1)[0];
+
+    res.json({
+      message: "Booking cancelled successfully",
+      booking: cancelledBooking
+    });
+  }
 }

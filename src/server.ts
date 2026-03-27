@@ -13,6 +13,7 @@ app.post("/login", AuthController.login);
 // Booking routes
 app.post("/bookings", BookingController.create);
 app.get("/bookings", BookingController.getAll);
+app.delete("/bookings/:id", BookingController.cancel);
 
 const PORT = 3000;
 
