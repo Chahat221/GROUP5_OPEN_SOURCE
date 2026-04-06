@@ -54,4 +54,30 @@ export class BookingController {
       booking: cancelledBooking
     });
   }
+
+  static updateStatus(req: Request, res: Response) {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const booking = bookings.find((booking) => booking.id === id);
+
+    if (!booking) {
+      return res.status(404).json({
+        message: "Booking not found"
+      });
+    }
+
+    if (status !== "accepted" && status !== "declined") {
+      return res.status(400).json({
+        message: "Invalid status"
+      });
+    }
+
+    booking.status = status;
+
+    res.json({
+      message: "Booking status updated successfully",
+      booking
+    });
+  }
 }

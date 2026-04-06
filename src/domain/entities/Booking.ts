@@ -5,5 +5,5 @@ export interface Booking {
   date: string;
   startTime: string;
   endTime: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "accepted" | "declined";
 }

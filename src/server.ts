@@ -15,6 +15,7 @@ app.post("/login", AuthController.login);
 app.post("/bookings", BookingController.create);
 app.get("/bookings", BookingController.getAll);
 app.delete("/bookings/:id", BookingController.cancel);
+app.patch("/bookings/:id/status", BookingController.updateStatus);
 
 // Event routes
 app.post("/events", EventController.create);
