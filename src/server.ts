@@ -2,6 +2,7 @@ import express from "express";
 import { AuthController } from "./controllers/AuthController";
 import { BookingController } from "./controllers/BookingController";
 import { EventController } from "./controllers/EventController";
+
 const app = express();
 
 app.use(express.json());
@@ -14,8 +15,11 @@ app.post("/login", AuthController.login);
 app.post("/bookings", BookingController.create);
 app.get("/bookings", BookingController.getAll);
 app.delete("/bookings/:id", BookingController.cancel);
+
+// Event routes
 app.post("/events", EventController.create);
 app.get("/events", EventController.getAll);
+app.post("/events/:id/register", EventController.registerUser);
 
 const PORT = 3000;
 

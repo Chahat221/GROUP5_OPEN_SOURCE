@@ -3,4 +3,5 @@ export interface Event {
   name: string;
   date: string;
   slots: string[];
+  registeredUsers: string[];
 }
