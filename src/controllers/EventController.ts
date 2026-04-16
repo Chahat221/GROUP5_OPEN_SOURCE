@@ -1,55 +1,74 @@
 import { Request, Response } from "express";
-import { Event } from "../domain/entities/Event";
-
-const events: Event[] = [];
+import { EventModel } from "../infrastructure/database/models/EventModel";
 
 export class EventController {
-  static create(req: Request, res: Response) {
-    const { name, date, slots } = req.body;
+  static async create(req: Request, res: Response) {
+    try {
+      const { name, date, slots } = req.body;
 
-    const newEvent: Event = {
-      id: Date.now().toString(),
-      name,
-      date,
-      slots,
-      registeredUsers: []
-    };
+      const newEvent = await EventModel.create({
+        name,
+        date,
+        slots,
+        registeredUsers: []
+      });
 
-    events.push(newEvent);
-
-    res.status(201).json({
-      message: "Event created successfully",
-      event: newEvent
-    });
-  }
-
-  static getAll(req: Request, res: Response) {
-    res.json(events);
-  }
-
-  static registerUser(req: Request, res: Response) {
-    const { id } = req.params;
-    const { userId } = req.body;
-
-    const event = events.find((e) => e.id === id);
-
-    if (!event) {
-      return res.status(404).json({
-        message: "Event not found"
+      res.status(201).json({
+        message: "Event created successfully",
+        event: newEvent
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to create event",
+        error
       });
     }
+  }
 
-    if (event.registeredUsers.includes(userId)) {
-      return res.status(400).json({
-        message: "User already registered for this event"
+  static async getAll(req: Request, res: Response) {
+    try {
+      const events = await EventModel.find();
+
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to fetch events",
+        error
       });
     }
+  }
 
-    event.registeredUsers.push(userId);
+  static async registerUser(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { userId } = req.body;
 
-    res.json({
-      message: "User registered for event successfully",
-      event
-    });
+      const event = await EventModel.findById(id);
+
+      if (!event) {
+        return res.status(404).json({
+          message: "Event not found"
+        });
+      }
+
+      if (event.registeredUsers.includes(userId)) {
+        return res.status(400).json({
+          message: "User already registered for this event"
+        });
+      }
+
+      event.registeredUsers.push(userId);
+      await event.save();
+
+      res.json({
+        message: "User registered for event successfully",
+        event
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to register user for event",
+        error
+      });
+    }
   }
 }

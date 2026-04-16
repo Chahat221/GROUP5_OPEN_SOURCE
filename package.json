@@ -22,7 +22,10 @@
   },
   "homepage": "https://github.com/Chahat221/GROUP5_OPEN_SOURCE#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "dotenv": "^17.4.2",
+    "dotenv-safe": "^9.1.0",
+    "express": "^5.2.1",
+    "mongoose": "^9.4.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
