@@ -28,12 +28,12 @@ export class BookingController {
         status: "pending"
       });
 
-      res.status(201).json({
+      return res.status(201).json({
         message: "Booking created successfully",
         booking
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         message: "Failed to create booking",
         error
       });
@@ -44,9 +44,9 @@ export class BookingController {
     try {
       const bookings = await BookingModel.find();
 
-      res.json(bookings);
+      return res.json(bookings);
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         message: "Failed to fetch bookings",
         error
       });
@@ -65,12 +65,12 @@ export class BookingController {
         });
       }
 
-      res.json({
+      return res.json({
         message: "Booking cancelled successfully",
         booking: deletedBooking
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         message: "Failed to cancel booking",
         error
       });
@@ -100,12 +100,12 @@ export class BookingController {
         });
       }
 
-      res.json({
+      return res.json({
         message: "Booking status updated successfully",
         booking: updatedBooking
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         message: "Failed to update booking status",
         error
       });
