@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { BookingModel } from "../infrastructure/database/models/BookingModel";
 
 export class BookingController {
-  static async create(req: Request, res: Response) {
+  static async create(req: Request, res: Response): Promise<void> {
     try {
       const { userId, service, date, startTime, endTime } = req.body;
 
@@ -14,9 +14,10 @@ export class BookingController {
       });
 
       if (existingBooking) {
-        return res.status(400).json({
+        res.status(400).json({
           message: "Time slot already booked"
         });
+        return;
       }
 
       const booking = await BookingModel.create({
@@ -28,64 +29,65 @@ export class BookingController {
         status: "pending"
       });
 
-      return res.status(201).json({
+      res.status(201).json({
         message: "Booking created successfully",
         booking
       });
     } catch (error) {
-      return res.status(500).json({
+      res.status(500).json({
         message: "Failed to create booking",
         error
       });
     }
   }
 
-  static async getAll(req: Request, res: Response) {
+  static async getAll(req: Request, res: Response): Promise<void> {
     try {
       const bookings = await BookingModel.find();
-
-      return res.json(bookings);
+      res.json(bookings);
     } catch (error) {
-      return res.status(500).json({
+      res.status(500).json({
         message: "Failed to fetch bookings",
         error
       });
     }
   }
 
-  static async cancel(req: Request, res: Response) {
+  static async cancel(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
       const deletedBooking = await BookingModel.findByIdAndDelete(id);
 
       if (!deletedBooking) {
-        return res.status(404).json({
+        res.status(404).json({
           message: "Booking not found"
         });
+        return;
       }
 
-      return res.json({
+      res.json({
         message: "Booking cancelled successfully",
         booking: deletedBooking
       });
     } catch (error) {
-      return res.status(500).json({
+      res.status(500).json({
         message: "Failed to cancel booking",
         error
       });
     }
   }
 
-  static async updateStatus(req: Request, res: Response) {
+  static async updateStatus(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { status } = req.body;
 
       if (status !== "accepted" && status !== "declined") {
-        return res.status(400).json({
+        res.status(400).json({
           message: "Invalid status"
         });
+        return;
       }
 
       const updatedBooking = await BookingModel.findByIdAndUpdate(
@@ -95,17 +97,18 @@ export class BookingController {
       );
 
       if (!updatedBooking) {
-        return res.status(404).json({
+        res.status(404).json({
           message: "Booking not found"
         });
+        return;
       }
 
-      return res.json({
+      res.json({
         message: "Booking status updated successfully",
         booking: updatedBooking
       });
     } catch (error) {
-      return res.status(500).json({
+      res.status(500).json({
         message: "Failed to update booking status",
         error
       });
