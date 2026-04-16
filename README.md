@@ -21,6 +21,10 @@ Backend application built with **Node.js**, **TypeScript**, and **Express** for 
 - Create booking
 - View bookings
 
+## MongoDB Integration Completed
+- Connected backend to MongoDB Atlas
+- Implemented booking system with conflict prevention
+
 ## Tech Stack
 - Node.js
 - TypeScript
