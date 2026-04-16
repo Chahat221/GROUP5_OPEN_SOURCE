@@ -1,83 +1,114 @@
 import { Request, Response } from "express";
-import { CreateBooking } from "../application/use-cases/CreateBooking";
-import { Booking } from "../domain/entities/Booking";
-
-const bookings: Booking[] = [];
+import { BookingModel } from "../infrastructure/database/models/BookingModel";
 
 export class BookingController {
-  static create(req: Request, res: Response) {
-    const { userId, service, date, startTime, endTime } = req.body;
+  static async create(req: Request, res: Response) {
+    try {
+      const { userId, service, date, startTime, endTime } = req.body;
 
-    const createBooking = new CreateBooking();
-    const booking = createBooking.execute(
-      userId,
-      service,
-      date,
-      startTime,
-      endTime,
-      bookings
-    );
+      const existingBooking = await BookingModel.findOne({
+        service,
+        date,
+        startTime,
+        endTime
+      });
 
-    if (!booking) {
-      return res.status(400).json({
-        message: "Time slot already booked"
+      if (existingBooking) {
+        return res.status(400).json({
+          message: "Time slot already booked"
+        });
+      }
+
+      const booking = await BookingModel.create({
+        userId,
+        service,
+        date,
+        startTime,
+        endTime,
+        status: "pending"
+      });
+
+      res.status(201).json({
+        message: "Booking created successfully",
+        booking
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to create booking",
+        error
       });
     }
-
-    bookings.push(booking);
-
-    res.status(201).json({
-      message: "Booking created successfully",
-      booking
-    });
   }
 
-  static getAll(req: Request, res: Response) {
-    res.json(bookings);
+  static async getAll(req: Request, res: Response) {
+    try {
+      const bookings = await BookingModel.find();
+
+      res.json(bookings);
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to fetch bookings",
+        error
+      });
+    }
   }
 
-  static cancel(req: Request, res: Response) {
-    const { id } = req.params;
+  static async cancel(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
 
-    const bookingIndex = bookings.findIndex((booking) => booking.id === id);
+      const deletedBooking = await BookingModel.findByIdAndDelete(id);
 
-    if (bookingIndex === -1) {
-      return res.status(404).json({
-        message: "Booking not found"
+      if (!deletedBooking) {
+        return res.status(404).json({
+          message: "Booking not found"
+        });
+      }
+
+      res.json({
+        message: "Booking cancelled successfully",
+        booking: deletedBooking
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to cancel booking",
+        error
       });
     }
-
-    const cancelledBooking = bookings.splice(bookingIndex, 1)[0];
-
-    res.json({
-      message: "Booking cancelled successfully",
-      booking: cancelledBooking
-    });
   }
 
-  static updateStatus(req: Request, res: Response) {
-    const { id } = req.params;
-    const { status } = req.body;
+  static async updateStatus(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
 
-    const booking = bookings.find((booking) => booking.id === id);
+      if (status !== "accepted" && status !== "declined") {
+        return res.status(400).json({
+          message: "Invalid status"
+        });
+      }
 
-    if (!booking) {
-      return res.status(404).json({
-        message: "Booking not found"
+      const updatedBooking = await BookingModel.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true }
+      );
+
+      if (!updatedBooking) {
+        return res.status(404).json({
+          message: "Booking not found"
+        });
+      }
+
+      res.json({
+        message: "Booking status updated successfully",
+        booking: updatedBooking
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to update booking status",
+        error
       });
     }
-
-    if (status !== "accepted" && status !== "declined") {
-      return res.status(400).json({
-        message: "Invalid status"
-      });
-    }
-
-    booking.status = status;
-
-    res.json({
-      message: "Booking status updated successfully",
-      booking
-    });
   }
 }
