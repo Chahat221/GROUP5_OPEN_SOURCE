@@ -1,0 +1,15 @@
+info:
+  name: Cancel booking
+  type: http
+  seq: 7
+
+http:
+  method: DELETE
+  url: http://localhost:5001/bookings/BOOKING_ID
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,23 @@
+info:
+  name: Create event
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: http://localhost:5001/events
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Tech Event",
+        "date": "2026-04-20",
+        "slots": 10
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { connectDB } from "./config/db";
 import { AuthController } from "./controllers/AuthController";
 import { BookingController } from "./controllers/BookingController";
+import { EventController } from "./controllers/EventController";
 
 dotenv.config();
 
@@ -34,7 +35,11 @@ app.get("/bookings", BookingController.getAll);
 app.delete("/bookings/:id", BookingController.cancel);
 app.put("/bookings/:id/status", BookingController.updateStatus);
 
-// Changed port from 3000 to 5001 because 3000 is already being used
+// Event routes
+app.post("/events", EventController.create);
+app.get("/events", EventController.getAll);
+app.post("/events/:id/register", EventController.registerUser);
+
 const PORT = 5001;
 
 const startServer = async () => {
