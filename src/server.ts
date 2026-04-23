@@ -1,10 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db";
-import { AuthController } from "./controllers/AuthController";
-import { BookingController } from "./controllers/BookingController";
-import { EventController } from "./controllers/EventController";
-import { authenticate, authorizeAdmin } from "./middleware/authMiddleware";
+
+import authRoutes from "./routes/authRoutes";
+import bookingRoutes from "./routes/bookingRoutes";
+import eventRoutes from "./routes/eventRoutes";
 
 dotenv.config();
 
@@ -22,27 +22,10 @@ app.get("/health", (req, res) => {
   res.json({ status: "OK" });
 });
 
-// Auth
-app.post("/register", AuthController.register);
-app.post("/login", AuthController.login);
-app.post("/refresh-token", AuthController.refreshToken);
-app.post("/logout", AuthController.logout);
-
-// Booking (protected)
-app.post("/bookings", authenticate, BookingController.create);
-app.get("/bookings", authenticate, BookingController.getAll);
-app.delete("/bookings/:id", authenticate, BookingController.cancel);
-app.put("/bookings/:id/status", authenticate, BookingController.updateStatus);
-
-// Events (protected)
-app.post("/events", authenticate, EventController.create);
-app.get("/events", authenticate, EventController.getAll);
-app.post("/events/:id/register", authenticate, EventController.registerUser);
-
-// Admin route
-app.get("/admin", authenticate, authorizeAdmin, (req, res) => {
-  res.json({ message: "Admin access granted" });
-});
+// Routes
+app.use("/", authRoutes);
+app.use("/bookings", bookingRoutes);
+app.use("/events", eventRoutes);
 
 const PORT = 5001;
 
