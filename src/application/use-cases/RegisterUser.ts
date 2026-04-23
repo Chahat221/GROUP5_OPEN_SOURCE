@@ -2,14 +2,12 @@ import { User } from "../../domain/entities/user";
 
 export class RegisterUser {
   execute(name: string, email: string, password: string): User {
-    const newUser: User = {
+    return {
       id: Date.now().toString(),
       name,
       email,
       password,
-      role: "user"
+      role: "user" // default
     };
-
-    return newUser;
   }
 }

@@ -4,6 +4,7 @@ import { connectDB } from "./config/db";
 import { AuthController } from "./controllers/AuthController";
 import { BookingController } from "./controllers/BookingController";
 import { EventController } from "./controllers/EventController";
+import { authenticate } from "./middleware/authMiddleware";
 
 dotenv.config();
 
@@ -15,6 +16,8 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Backend API is running");
 });
+
+app.get("/bookings", authenticate, BookingController.getAll);
 
 // Health check route
 app.get("/health", (req, res) => {
