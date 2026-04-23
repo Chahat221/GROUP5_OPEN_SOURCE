@@ -4,7 +4,7 @@ import { connectDB } from "./config/db";
 import { AuthController } from "./controllers/AuthController";
 import { BookingController } from "./controllers/BookingController";
 import { EventController } from "./controllers/EventController";
-import { authenticate } from "./middleware/authMiddleware";
+import { authenticate, authorizeAdmin } from "./middleware/authMiddleware";
 
 dotenv.config();
 
@@ -12,36 +12,37 @@ const app = express();
 
 app.use(express.json());
 
-// Root route
+// Root
 app.get("/", (req, res) => {
   res.send("Backend API is running");
 });
 
-app.get("/bookings", authenticate, BookingController.getAll);
-
-// Health check route
+// Health
 app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "OK",
-    message: "API is working",
-    time: new Date().toISOString()
-  });
+  res.json({ status: "OK" });
 });
 
-// Authentication routes
+// Auth
 app.post("/register", AuthController.register);
 app.post("/login", AuthController.login);
+app.post("/refresh-token", AuthController.refreshToken);
+app.post("/logout", AuthController.logout);
 
-// Booking routes
-app.post("/bookings", BookingController.create);
-app.get("/bookings", BookingController.getAll);
-app.delete("/bookings/:id", BookingController.cancel);
-app.put("/bookings/:id/status", BookingController.updateStatus);
+// Booking (protected)
+app.post("/bookings", authenticate, BookingController.create);
+app.get("/bookings", authenticate, BookingController.getAll);
+app.delete("/bookings/:id", authenticate, BookingController.cancel);
+app.put("/bookings/:id/status", authenticate, BookingController.updateStatus);
 
-// Event routes
-app.post("/events", EventController.create);
-app.get("/events", EventController.getAll);
-app.post("/events/:id/register", EventController.registerUser);
+// Events (protected)
+app.post("/events", authenticate, EventController.create);
+app.get("/events", authenticate, EventController.getAll);
+app.post("/events/:id/register", authenticate, EventController.registerUser);
+
+// Admin route
+app.get("/admin", authenticate, authorizeAdmin, (req, res) => {
+  res.json({ message: "Admin access granted" });
+});
 
 const PORT = 5001;
 
@@ -53,7 +54,7 @@ const startServer = async () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error("Failed to start server:", error);
+    console.error(error);
   }
 };
 

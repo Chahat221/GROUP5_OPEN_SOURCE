@@ -1,7 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-
-const SECRET = "secret"; // same as TokenService
+import { TokenService } from "../infrastructure/auth/TokenService";
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -13,7 +11,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, SECRET);
+    const decoded = TokenService.verifyAccessToken(token);
     (req as any).user = decoded;
     next();
   } catch (error) {
@@ -22,8 +20,11 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
 };
 
 export const authorizeAdmin = (req: Request, res: Response, next: NextFunction) => {
-  if ((req as any).user?.role !== "admin") {
+  const user = (req as any).user;
+
+  if (!user || user.role !== "admin") {
     return res.status(403).json({ message: "Admin access required" });
   }
+
   next();
 };
