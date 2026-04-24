@@ -1,76 +1,26 @@
 import { Request, Response } from "express";
-import { EventModel } from "../infrastructure/database/models/EventModel";
+
+const events: any[] = [];
 
 export class EventController {
-  static async create(req: Request, res: Response): Promise<void> {
-    try {
-      const { name, date, slots } = req.body;
+  static create(req: Request, res: Response) {
+    const newEvent = {
+      id: Date.now().toString(),
+      ...req.body
+    };
 
-      const newEvent = await EventModel.create({
-        name,
-        date,
-        slots,
-        registeredUsers: []
-      });
+    events.push(newEvent);
 
-      res.status(201).json({
-        message: "Event created successfully",
-        event: newEvent
-      });
-    } catch (error) {
-      res.status(500).json({
-        message: "Failed to create event",
-        error
-      });
-    }
+    return res.json({
+      message: "Event created successfully",
+      event: newEvent
+    });
   }
 
-  static async getAll(req: Request, res: Response): Promise<void> {
-    try {
-      const events = await EventModel.find();
-
-      res.json(events);
-    } catch (error) {
-      res.status(500).json({
-        message: "Failed to fetch events",
-        error
-      });
-    }
-  }
-
-  static async registerUser(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const { userId } = req.body;
-
-      const event = await EventModel.findById(id);
-
-      if (!event) {
-        res.status(404).json({
-          message: "Event not found"
-        });
-        return;
-      }
-
-      if (event.registeredUsers.includes(userId)) {
-        res.status(400).json({
-          message: "User already registered for this event"
-        });
-        return;
-      }
-
-      event.registeredUsers.push(userId);
-      await event.save();
-
-      res.json({
-        message: "User registered for event successfully",
-        event
-      });
-    } catch (error) {
-      res.status(500).json({
-        message: "Failed to register user for event",
-        error
-      });
-    }
+  static getAll(req: Request, res: Response) {
+    return res.json({
+      message: "Events fetched successfully",
+      events
+    });
   }
 }

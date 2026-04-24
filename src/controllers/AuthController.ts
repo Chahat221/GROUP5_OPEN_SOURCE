@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { TokenService } from "../middleware/TokenService";
+import { TokenService } from "../infrastructure/auth/TokenService";
 
 const users: any[] = [];
 
