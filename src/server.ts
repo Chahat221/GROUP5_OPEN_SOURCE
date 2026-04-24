@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db";
 
@@ -10,35 +11,26 @@ dotenv.config();
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
-// Root
-app.get("/", (req, res) => {
-  res.send("Backend API is running");
-});
+// ✅ ROUTES
+app.use("/api/auth", authRoutes);
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/events", eventRoutes);
 
-// Health
+// ✅ HEALTH CHECK
 app.get("/health", (req, res) => {
-  res.json({ status: "OK" });
+  res.json({ message: "Server is running" });
 });
 
-// Routes
-app.use("/", authRoutes);
-app.use("/bookings", bookingRoutes);
-app.use("/events", eventRoutes);
-
-const PORT = 5001;
+const PORT = process.env.PORT || 5001;
 
 const startServer = async () => {
-  try {
-    await connectDB();
-
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error(error);
-  }
+  await connectDB();
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 };
 
 startServer();

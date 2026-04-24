@@ -3,9 +3,8 @@ import { AuthController } from "../controllers/AuthController";
 
 const router = express.Router();
 
-router.post("/register", AuthController.register);
-router.post("/login", AuthController.login);
-router.post("/refresh-token", AuthController.refreshToken);
-router.post("/logout", AuthController.logout);
+// ✅ IMPORTANT: wrap in arrow function
+router.post("/register", (req, res) => AuthController.register(req, res));
+router.post("/login", (req, res) => AuthController.login(req, res));
 
 export default router;

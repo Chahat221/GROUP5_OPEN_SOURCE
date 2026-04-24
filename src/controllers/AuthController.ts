@@ -1,18 +1,30 @@
 import { Request, Response } from "express";
-import { RegisterUser } from "../application/use-cases/RegisterUser";
 import { TokenService } from "../infrastructure/auth/TokenService";
-import { User } from "../domain/entities/user";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: "user" | "admin";
+  refreshToken?: string;
+}
 
 const users: User[] = [];
-const refreshTokens: string[] = [];
 
 export class AuthController {
 
+  // ✅ REGISTER
   static register(req: Request, res: Response) {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
-    const registerUser = new RegisterUser();
-    const newUser = registerUser.execute(name, email, password);
+    const newUser: User = {
+      id: Date.now().toString(),
+      name,
+      email,
+      password,
+      role: role || "user"
+    };
 
     users.push(newUser);
 
@@ -22,23 +34,22 @@ export class AuthController {
     });
   }
 
+  // ✅ LOGIN
   static login(req: Request, res: Response) {
     const { email, password } = req.body;
 
     const user = users.find(
-      (u) => u.email === email && u.password === password
+      u => u.email === email && u.password === password
     );
 
     if (!user) {
-      return res.status(401).json({
-        message: "Invalid credentials"
-      });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const accessToken = TokenService.generateAccessToken(user);
     const refreshToken = TokenService.generateRefreshToken(user);
 
-    refreshTokens.push(refreshToken);
+    user.refreshToken = refreshToken;
 
     res.json({
       message: "Login successful",
@@ -48,44 +59,31 @@ export class AuthController {
     });
   }
 
-  static refreshToken(req: Request, res: Response) {
-    const { refreshToken } = req.body;
+  // ✅ REFRESH TOKEN
+  static refresh(req: Request, res: Response) {
+    const { token } = req.body;
 
-    if (!refreshToken || !refreshTokens.includes(refreshToken)) {
-      return res.status(403).json({
-        message: "Invalid refresh token"
-      });
+    const user = users.find(u => u.refreshToken === token);
+
+    if (!user) {
+      return res.status(403).json({ message: "Invalid refresh token" });
     }
 
-    try {
-      const decoded: any = TokenService.verifyRefreshToken(refreshToken);
+    const newAccessToken = TokenService.generateAccessToken(user);
 
-      const newAccessToken = TokenService.generateAccessToken({
-        id: decoded.id,
-        role: "user"
-      });
-
-      res.json({
-        accessToken: newAccessToken
-      });
-    } catch {
-      return res.status(403).json({
-        message: "Token expired"
-      });
-    }
+    res.json({ accessToken: newAccessToken });
   }
 
+  // ✅ LOGOUT
   static logout(req: Request, res: Response) {
-    const { refreshToken } = req.body;
+    const { token } = req.body;
 
-    const index = refreshTokens.indexOf(refreshToken);
+    const user = users.find(u => u.refreshToken === token);
 
-    if (index !== -1) {
-      refreshTokens.splice(index, 1);
+    if (user) {
+      user.refreshToken = undefined;
     }
 
-    res.json({
-      message: "Logged out successfully"
-    });
+    res.json({ message: "Logged out successfully" });
   }
 }

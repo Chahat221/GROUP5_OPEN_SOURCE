@@ -1,7 +1,8 @@
 export interface User {
-  id: string;
+  id?: string;
   name: string;
   email: string;
   password: string;
-  role: "user" | "admin";
+  role: "user" | "admin"; // 👈 IMPORTANT
+  refreshToken?: string;
 }
