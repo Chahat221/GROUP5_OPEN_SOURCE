@@ -1,30 +1,28 @@
 import { Request, Response, NextFunction } from "express";
-import { TokenService } from "../infrastructure/auth/TokenService";
+import jwt from "jsonwebtoken";
 
-export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+export const authenticateToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
 
-  if (!authHeader) {
-    return res.status(401).json({ message: "No token provided" });
+  if (!token) {
+    return res.status(401).json({ message: "Access token required" });
   }
 
-  const token = authHeader.split(" ")[1];
+  jwt.verify(
+    token,
+    process.env.ACCESS_TOKEN_SECRET as string,
+    (err, user) => {
+      if (err) {
+        return res.status(403).json({ message: "Invalid or expired token" });
+      }
 
-  try {
-    const decoded = TokenService.verifyAccessToken(token);
-    (req as any).user = decoded;
-    next();
-  } catch (error) {
-    return res.status(403).json({ message: "Invalid token" });
-  }
-};
-
-export const authorizeAdmin = (req: Request, res: Response, next: NextFunction) => {
-  const user = (req as any).user;
-
-  if (!user || user.role !== "admin") {
-    return res.status(403).json({ message: "Admin access required" });
-  }
-
-  next();
+      (req as any).user = user;
+      next();
+    }
+  );
 };

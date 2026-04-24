@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 
-const ACCESS_SECRET = "access_secret";
-const REFRESH_SECRET = "refresh_secret";
+const getAccessSecret = () => process.env.ACCESS_TOKEN_SECRET as string;
+const getRefreshSecret = () => process.env.REFRESH_TOKEN_SECRET as string;
 
 export class TokenService {
-
   static generateAccessToken(user: any) {
     return jwt.sign(
       {
@@ -12,7 +11,7 @@ export class TokenService {
         email: user.email,
         role: user.role || "user"
       },
-      ACCESS_SECRET,
+      getAccessSecret(),
       { expiresIn: "15m" }
     );
   }
@@ -22,17 +21,8 @@ export class TokenService {
       {
         id: user.id
       },
-      REFRESH_SECRET,
+      getRefreshSecret(),
       { expiresIn: "7d" }
     );
-  }
-
-  // ✅ THIS IS WHAT YOU WERE MISSING
-  static verifyAccessToken(token: string) {
-    return jwt.verify(token, ACCESS_SECRET);
-  }
-
-  static verifyRefreshToken(token: string) {
-    return jwt.verify(token, REFRESH_SECRET);
   }
 }

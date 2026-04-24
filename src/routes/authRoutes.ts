@@ -1,10 +1,13 @@
 import express from "express";
 import { AuthController } from "../controllers/AuthController";
+import { authenticateToken } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
-// ✅ IMPORTANT: wrap in arrow function
-router.post("/register", (req, res) => AuthController.register(req, res));
-router.post("/login", (req, res) => AuthController.login(req, res));
+router.post("/register", AuthController.register);
+router.post("/login", AuthController.login);
+
+
+router.get("/profile", authenticateToken, AuthController.profile);
 
 export default router;
