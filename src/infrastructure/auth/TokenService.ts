@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
-const ACCESS_SECRET = "access_secret";
-const REFRESH_SECRET = "refresh_secret";
+const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET as string;
+const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET as string;
 
 export class TokenService {
 
@@ -27,7 +27,6 @@ export class TokenService {
     );
   }
 
-  // ✅ THIS IS WHAT YOU WERE MISSING
   static verifyAccessToken(token: string) {
     return jwt.verify(token, ACCESS_SECRET);
   }

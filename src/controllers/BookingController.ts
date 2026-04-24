@@ -1,117 +1,61 @@
 import { Request, Response } from "express";
-import { BookingModel } from "../infrastructure/database/models/BookingModel";
+
+const bookings: any[] = [];
 
 export class BookingController {
-  static async create(req: Request, res: Response): Promise<void> {
-    try {
-      const { userId, service, date, startTime, endTime } = req.body;
+  static create(req: Request, res: Response) {
+    const newBooking = {
+      id: Date.now().toString(),
+      status: "pending",
+      ...req.body
+    };
 
-      const existingBooking = await BookingModel.findOne({
-        service,
-        date,
-        startTime,
-        endTime
-      });
+    bookings.push(newBooking);
 
-      if (existingBooking) {
-        res.status(400).json({
-          message: "Time slot already booked"
-        });
-        return;
-      }
-
-      const booking = await BookingModel.create({
-        userId,
-        service,
-        date,
-        startTime,
-        endTime,
-        status: "pending"
-      });
-
-      res.status(201).json({
-        message: "Booking created successfully",
-        booking
-      });
-    } catch (error) {
-      res.status(500).json({
-        message: "Failed to create booking",
-        error
-      });
-    }
+    return res.json({
+      message: "Booking created successfully",
+      booking: newBooking
+    });
   }
 
-  static async getAll(req: Request, res: Response): Promise<void> {
-    try {
-      const bookings = await BookingModel.find();
-      res.json(bookings);
-    } catch (error) {
-      res.status(500).json({
-        message: "Failed to fetch bookings",
-        error
-      });
-    }
+  static getAll(req: Request, res: Response) {
+    return res.json({
+      bookings
+    });
   }
 
-  static async cancel(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
+  static updateStatus(req: Request, res: Response) {
+    const { id } = req.params;
+    const { status } = req.body;
 
-      const deletedBooking = await BookingModel.findByIdAndDelete(id);
+    const booking = bookings.find((b) => b.id === id);
 
-      if (!deletedBooking) {
-        res.status(404).json({
-          message: "Booking not found"
-        });
-        return;
-      }
-
-      res.json({
-        message: "Booking cancelled successfully",
-        booking: deletedBooking
-      });
-    } catch (error) {
-      res.status(500).json({
-        message: "Failed to cancel booking",
-        error
-      });
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
     }
+
+    booking.status = status;
+
+    return res.json({
+      message: "Status updated",
+      booking
+    });
   }
 
-  static async updateStatus(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const { status } = req.body;
+  static cancel(req: Request, res: Response) {
+    const { id } = req.params;
 
-      if (status !== "accepted" && status !== "declined") {
-        res.status(400).json({
-          message: "Invalid status"
-        });
-        return;
-      }
+    const index = bookings.findIndex((b) => b.id === id);
 
-      const updatedBooking = await BookingModel.findByIdAndUpdate(
-        id,
-        { status },
-        { new: true }
-      );
-
-      if (!updatedBooking) {
-        res.status(404).json({
-          message: "Booking not found"
-        });
-        return;
-      }
-
-      res.json({
-        message: "Booking status updated successfully",
-        booking: updatedBooking
-      });
-    } catch (error) {
-      res.status(500).json({
-        message: "Failed to update booking status",
-        error
-      });
+    if (index === -1) {
+      return res.status(404).json({ message: "Booking not found" });
     }
+
+    const deleted = bookings.splice(index, 1);
+
+    return res.json({
+      message: "Booking cancelled",
+      booking: deleted[0]
+    });
   }
 }
